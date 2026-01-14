@@ -19,7 +19,7 @@ To disconnect a lamp, press its nose five times.
 
 ###
 
-(Manual)[https://www.lexon-design.com/media/documents/manuals/bdl-balloon-dog-lamp-user-guide-2025.pdf]
+[Manual](https://www.lexon-design.com/media/documents/manuals/bdl-balloon-dog-lamp-user-guide-2025.pdf)
 
 ## Speaker Dog
 
