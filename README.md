@@ -2,7 +2,7 @@
 
 LXJK-BDLA Bluetooth Control Protocol
 
-Looking to reverse engineer the control protocol for the LX/JK Bluetooth Dog Lamp.
+Looking to reverse engineer the control protocol for the LX/JK Balloon Dog Lamp.
 Message me if you're interested/able to help out :)
 
 ## Lamp Dog
