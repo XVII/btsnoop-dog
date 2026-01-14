@@ -24,3 +24,5 @@ To disconnect a lamp, press its nose five times.
 
 - Speaker: `LX-JK-BDS-A`
 - FCC: `2ARD3-LXJKBDSA` (12/18/2025)
+
+Bluetooth Chip: MVSilicon `BP1048B2`
