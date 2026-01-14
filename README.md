@@ -17,6 +17,10 @@ FCC ID: 2ARD3-LXJKBDLA (?)
 
 To disconnect a lamp, press its nose five times.
 
+###
+
+[Manual]{https://www.lexon-design.com/media/documents/manuals/bdl-balloon-dog-lamp-user-guide-2025.pdf}
+
 ## Speaker Dog
 
 - Speaker: `LX-JK-BDS-A`
