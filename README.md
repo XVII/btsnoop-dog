@@ -2,13 +2,12 @@
 
 LXJK-BDLA Bluetooth Control Protocol
 
-Looking to reverse engineer the control protocol for the LX/JK Balloon Dog Lamp.
-Message me if you're interested/able to help out :)
+Looking to reverse engineer the control protocol for the LX/JK Balloon Dog Lamp. Message me if you're interested/able to help out :)
 
 ## Device
 
 Model No: `LX-JK-BDL-A`
-FCC ID: `2ARD3-LXJKBDLA` (?)
+FCC ID: `2ARD3-LXJKBDLA` (01/21/2026)
 
 ## Bluetooth Pairing Sequence
 
