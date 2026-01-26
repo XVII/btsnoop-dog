@@ -43,7 +43,7 @@ local EFFECT_DIRECTION_OFFSET = MAGIC_LENGTH + 23
 local EFFECT_DIRECTION_LENGTH = 1
 local SUNSET_MODE_OFFSET = MAGIC_LENGTH + 26
 local SUNSET_MODE_LENGTH = 1
-local EXPECTED_LENGTH = 64 - MAGIC_OFFSET  -- Excludes 3-byte BT CRC at end
+local EXPECTED_LENGTH = 64 - MAGIC_OFFSET + 3 -- 3 extra bytes for BTLE CRC
 
 local function get_field_offset(relative_offset)
     return MAGIC_OFFSET + relative_offset
