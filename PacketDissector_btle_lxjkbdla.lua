@@ -3,27 +3,27 @@
 -- Reverse engineered by analyzing captured packets with the help of AI
 
 -- Create a new protocol
-local ble_lxjkbd        = Proto("ble_lxjkbd", "BLE Lexon x Jeff Koons Balloon Dog Lamp Protocol")
+local proto        = Proto("btle_lxjkbdla", "BLE Lexon x Jeff Koons Balloon Dog Lamp Protocol")
 
 -- Define protocol fields
-local fields            = ble_lxjkbd.fields
+local fields            = proto.fields
 
 -- Guessed fields
-fields.expected_length  = ProtoField.string("ble_lxjkbd.expected_length", "Expected Length", base.NONE)
-fields.lamp_group_id    = ProtoField.bytes("ble_lxjkbd.lamp_group_id", "Lamp Group ID", base.COLON)
-fields.sequence_id      = ProtoField.uint8("ble_lxjkbd.sequence_id", "Sequence ID (0-255)", base.DEC)
-fields.mode             = ProtoField.uint8("ble_lxjkbd.mode", "Mode", base.DEC,
+fields.expected_length  = ProtoField.string("btle_lxjkbdla.expected_length", "Expected Length", base.NONE)
+fields.lamp_group_id    = ProtoField.bytes("btle_lxjkbdla.lamp_group_id", "Lamp Group ID", base.COLON)
+fields.sequence_id      = ProtoField.uint8("btle_lxjkbdla.sequence_id", "Sequence ID (0-255)", base.DEC)
+fields.mode             = ProtoField.uint8("btle_lxjkbdla.mode", "Mode", base.DEC,
     { [0] = "Solid Color", [1] = "Sunset", [2] = "Rainbow Flow", [3] = "Fill", [4] = "Knight Rider", [5] =
     "Rainbow Cycle", [6] = "Slow Flow", [7] = "Breathing Rainbow Cycle", [8] = "Chase Solid", [9] = "Strobe", [10] =
     "Segment" })
 
-fields.bright           = ProtoField.uint16("ble_lxjkbd.brightness", "Brightness", base.DEC)
+fields.bright           = ProtoField.uint16("btle_lxjkbdla.brightness", "Brightness", base.DEC)
 
-fields.effect_direction = ProtoField.bytes("ble_lxjkbd.effect_direction", "Effect Direction", base.NONE)
-fields.sunset_mode     = ProtoField.uint8("ble_lxjkbd.sunset_mode", "Sunset Mode", base.DEC, { [0] = "Cool", [1] = "Warm"})
+fields.effect_direction = ProtoField.bytes("btle_lxjkbdla.effect_direction", "Effect Direction", base.NONE)
+fields.sunset_mode     = ProtoField.uint8("btle_lxjkbdla.sunset_mode", "Sunset Mode", base.DEC, { [0] = "Cool", [1] = "Warm"})
 
-fields.all_bytes       = ProtoField.bytes("ble_lxjkbd.all_bytes", "All Bytes", base.COLON)
-fields.all_bytes_index = ProtoField.bytes("ble_lxjkbd.all_bytes_index", "Hex Index", base.COLON)
+fields.all_bytes       = ProtoField.bytes("btle_lxjkbdla.all_bytes", "All Bytes", base.COLON)
+fields.all_bytes_index = ProtoField.bytes("btle_lxjkbdla.all_bytes_index", "Hex Index", base.COLON)
 
 -- Define the magic number and offsets (all offsets relative to MAGIC_OFFSET)
 local MAGIC_NUMBER     = { 0x21, 0x48, 0x52, 0x52, 0x46 }
@@ -70,7 +70,7 @@ local function check_magic_number(buffer, offset)
 end
 
 -- Dissector function
-function ble_lxjkbd.dissector(buffer, pinfo, tree)
+function proto.dissector(buffer, pinfo, tree)
     -- Check if buffer has sufficient length for magic number
     if buffer:len() < MAGIC_OFFSET + MAGIC_LENGTH then
         return 0
@@ -87,7 +87,7 @@ function ble_lxjkbd.dissector(buffer, pinfo, tree)
     pinfo.cols.protocol = "BLE Lexon x Jeff Koons Balloon Dog Lamp Protocol"
 
     -- Create main subtree
-    local subtree = tree:add(ble_lxjkbd, buffer(), "Lexon x Jeff Koons Balloon Dog Lamp Data")
+    local subtree = tree:add(proto, buffer(), "Lexon x Jeff Koons Balloon Dog Lamp Data")
 
     -- Lamp Group ID (6 bytes after magic)
     local lamp_group_abs = get_field_offset(LAMP_GROUP_ID_OFFSET)
@@ -164,4 +164,4 @@ function ble_lxjkbd.dissector(buffer, pinfo, tree)
 end
 
 -- Register the dissector
-register_postdissector(ble_lxjkbd)
+register_postdissector(proto)
