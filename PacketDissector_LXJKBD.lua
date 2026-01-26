@@ -28,8 +28,7 @@ fields.all_bytes_index = ProtoField.bytes("ble_lxjkbd.all_bytes_index", "Hex Ind
 -- Define the magic number and offsets (all offsets relative to MAGIC_OFFSET)
 local MAGIC_NUMBER     = { 0x21, 0x48, 0x52, 0x52, 0x46 }
 local MAGIC_LENGTH     = #MAGIC_NUMBER
-local MAGIC_OFFSET     = 32 -- absolute offset in packet
-
+local MAGIC_OFFSET     = 32 -- absolute offset in packet // TODO: This may vary based on where the adv data is located and what flags are set, should probably be detected dynamically
 
 -- Offsets relative to MAGIC_OFFSET
 local LAMP_GROUP_ID_OFFSET = MAGIC_LENGTH                          -- immediately after magic
