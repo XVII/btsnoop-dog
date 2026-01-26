@@ -8,10 +8,6 @@ local ble_lxjkbd        = Proto("ble_lxjkbd", "BLE Lexon x Jeff Koons Balloon Do
 -- Define protocol fields
 local fields            = ble_lxjkbd.fields
 
--- Duplicate tracking fields
-fields.message_id       = ProtoField.bytes("ble_lxjkbd.message_id", "Message ID", base.NONE)
-fields.message_status   = ProtoField.string("ble_lxjkbd.message_status", "Message Status", base.NONE)
-
 -- Guessed fields
 fields.expected_length  = ProtoField.string("ble_lxjkbd.expected_length", "Expected Length", base.NONE)
 fields.lamp_group_id    = ProtoField.bytes("ble_lxjkbd.lamp_group_id", "Lamp Group ID", base.COLON)
@@ -48,17 +44,11 @@ local EFFECT_DIRECTION_OFFSET = MAGIC_LENGTH + 23
 local EFFECT_DIRECTION_LENGTH = 1
 local SUNSET_MODE_OFFSET = MAGIC_LENGTH + 26
 local SUNSET_MODE_LENGTH = 1
-local MESSAGE_ID_OFFSET = 64 - MAGIC_OFFSET
-local MESSAGE_ID_LENGTH = 3
-local EXPECTED_LENGTH = 67 - MAGIC_OFFSET
+local EXPECTED_LENGTH = 64 - MAGIC_OFFSET  -- Excludes 3-byte BT CRC at end
 
 local function get_field_offset(relative_offset)
     return MAGIC_OFFSET + relative_offset
 end
-
--- Track all seen Message IDs to flag duplicates regardless of order
-local seen_message_ids = {}
-local frame_message_status = {}
 
 local function range_to_hex(range)
     local bytes = range:bytes()
@@ -154,36 +144,6 @@ function ble_lxjkbd.dissector(buffer, pinfo, tree)
             subtree:add(fields.all_bytes_index, idx_tvb(0, idx_len))
         end
     end
-
-    -- Message ID Parsing and Duplicate Detection
-    local message_status_text = "Missing"
-    local message_id_hex = nil
-
-    local message_id_abs = get_field_offset(MESSAGE_ID_OFFSET)
-    if buffer:len() >= message_id_abs + MESSAGE_ID_LENGTH then
-        local message_id_bytes = buffer(message_id_abs, MESSAGE_ID_LENGTH)
-        message_id_hex = range_to_hex(message_id_bytes)
-
-        -- Only mutate caches on first visit; Wireshark calls dissectors multiple times
-        if not pinfo.visited then
-            local is_duplicate = seen_message_ids[message_id_hex] == true
-            if is_duplicate then
-                message_status_text = "Seen"
-            else
-                message_status_text = "New"
-                seen_message_ids[message_id_hex] = true
-            end
-            frame_message_status[pinfo.number] = message_status_text
-        else
-            message_status_text = frame_message_status[pinfo.number] or "Seen"
-        end
-
-        subtree:add(fields.message_id, message_id_bytes)
-    else
-        message_status_text = "Missing"
-    end
-
-    subtree:add(fields.message_status, message_status_text)
 
     -- Check for unexpected data length
     local expected_abs = get_field_offset(EXPECTED_LENGTH)
