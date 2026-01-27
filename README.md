@@ -27,7 +27,7 @@ To disconnect a lamp, press its nose five times.
 ## Initial Notes
 
 - The pairing sequence seems to be more about grouping/linking so that lamps can be grouped together. Without having more lamps, can't really test this.
-- The dog only emits bluetooth advertisments when something is changed on the lamp (i.e. brightness, mode), there have been no idle adverstiments observed to date.
+- The dog only emits bluetooth advertisements when something is changed on the lamp (i.e. brightness, mode), there have been no idle advertisements observed to date.
 - No packets are sent on low battery, low battery power-off, battery charge start/stop.
 
 ## Fields and Offsets
