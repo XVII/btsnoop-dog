@@ -36,16 +36,16 @@ To disconnect a lamp, press its nose five times.
 |------------|------------------|-------------------|--------|-------------|
 | Magic Number | 0 | 32 | 5 bytes | `21 48 52 52 46` |
 | Lamp Group ID | 5 | 37 | 6 bytes | Device group identifier (represents 1 or more lamps) |
-| Unknown | 11 | 43 | 2 bytes | Purpose not yet identified |
+| Unknown #1 | 11 | 43 | 2 bytes | Purpose not yet identified |
 | Sequence ID | 13 | 45 | 1 byte | Counter (0-255). Used to prevent issues with out of order BLE packets? |
 | Power State | 14 | 46 | 1 byte | 0=Off, 1=On |
 | Mode | 15 | 47 | 1 byte | Lighting mode (0-10). See table below. |
-| Unknown | 16 | 48 | 4 bytes | Purpose not yet identified |
+| Unknown #2 | 16 | 48 | 4 bytes | Purpose not yet identified |
 | Brightness | 20 | 52 | 2 bytes | Brightness level (0-1000) |
-| Unknown | 22 | 54 | 6 bytes | Purpose not yet identified |
+| Unknown #3 | 22 | 54 | 6 bytes | Purpose not yet identified |
 | Effect Direction | 28 | 60 | 1 byte | Direction for effects? |
 | Effect Breathing Color | 29 | 61 | 1 byte | Color for breathing effects. See table below. |
-| Unknown | 30 | 62 | 1 byte | Purpose not yet identified |
+| Unknown #4 | 30 | 62 | 1 byte | Purpose not yet identified |
 | Effect Color | 31 | 63 | 1 byte | Color settings. See table below. |
 
 \* Relative to the magic number start (offset 0 = first byte of magic)  

@@ -8,6 +8,12 @@ local proto        = Proto("btle_lxjkbdla", "BLE Lexon x Jeff Koons Balloon Dog 
 -- Define protocol fields
 local fields            = proto.fields
 
+-- Unknown Fields
+fields.unknown_bytes1  = ProtoField.bytes("btle_lxjkbdla.unknown_bytes1", "Unknown Bytes 1", base.COLON)
+fields.unknown_bytes2  = ProtoField.bytes("btle_lxjkbdla.unknown_bytes2", "Unknown Bytes 2", base.COLON)
+fields.unknown_bytes3  = ProtoField.bytes("btle_lxjkbdla.unknown_bytes3", "Unknown Bytes 3", base.COLON)
+fields.unknown_bytes4  = ProtoField.bytes("btle_lxjkbdla.unknown_bytes4", "Unknown Bytes 4", base.COLON)
+
 -- Guessed fields
 fields.expected_length  = ProtoField.string("btle_lxjkbdla.expected_length", "Expected Length", base.NONE)
 fields.lamp_group_id    = ProtoField.bytes("btle_lxjkbdla.lamp_group_id", "Lamp Group ID", base.COLON)
@@ -39,20 +45,28 @@ local MAGIC_OFFSET     = 32 -- absolute offset in packet // TODO: This may vary 
 local EXPECTED_LENGTH = 64 - MAGIC_OFFSET + 3 -- 3 extra bytes for BTLE CRC
 
 -- Offsets relative to MAGIC_OFFSET
-local LAMP_GROUP_ID_OFFSET = MAGIC_LENGTH                          -- immediately after magic
+local LAMP_GROUP_ID_OFFSET = MAGIC_LENGTH                       -- immediately after magic
 local LAMP_GROUP_ID_LENGTH = 6
-local SEQUENCE_ID_OFFSET = MAGIC_LENGTH + LAMP_GROUP_ID_LENGTH + 2 -- 2 unknown bytes after lamp group
+local UNKNOWN1_OFFSET = MAGIC_LENGTH + 6
+local UNKNOWN1_LENGTH = 2
+local SEQUENCE_ID_OFFSET = MAGIC_LENGTH + 8
 local SEQUENCE_ID_LENGTH = 1
 local POWER_STATE_OFFSET = MAGIC_LENGTH + 9
 local POWER_STATE_LENGTH = 1
 local MODE_OFFSET = MAGIC_LENGTH + 10                         -- Also seems to be at byte +22 and +23?
 local MODE_LENGTH = 1
+local UNKNOWN2_OFFSET = MAGIC_LENGTH + 11
+local UNKNOWN2_LENGTH = 4
 local BRIGHTNESS_OFFSET = MAGIC_LENGTH + 15
 local BRIGHTNESS_LENGTH = 2
+local UNKNOWN3_OFFSET = MAGIC_LENGTH + 17
+local UNKNOWN3_LENGTH = 6
 local EFFECT_DIRECTION_OFFSET = MAGIC_LENGTH + 23
 local EFFECT_DIRECTION_LENGTH = 1
 local EFFECT_BREATHING_COLOR_OFFSET = MAGIC_LENGTH + 24
 local EFFECT_BREATHING_COLOR_LENGTH = 1
+local UNKNOWN4_OFFSET = MAGIC_LENGTH + 25
+local UNKNOWN4_LENGTH = 1
 local EFFECT_COLOR_OFFSET = MAGIC_LENGTH + 26                   -- This is a sub-mode for more than just colour -- need to map them out
 local EFFECT_COLOR_LENGTH = 1
 
@@ -106,6 +120,12 @@ function proto.dissector(buffer, pinfo, tree)
         subtree:add(fields.lamp_group_id, buffer(lamp_group_abs, LAMP_GROUP_ID_LENGTH))
     end
 
+    -- Unknown bytes (2 bytes after lamp group ID)
+    local unknown1_abs = get_field_offset(UNKNOWN1_OFFSET)
+    if buffer:len() >= unknown1_abs + UNKNOWN1_LENGTH then
+        subtree:add(fields.unknown_bytes1, buffer(unknown1_abs, UNKNOWN1_LENGTH))
+    end
+
     -- Sequence ID (after lamp group ID + 2 unknown bytes)
     local sequence_id_abs = get_field_offset(SEQUENCE_ID_OFFSET)
     if buffer:len() >= sequence_id_abs + SEQUENCE_ID_LENGTH then
@@ -124,10 +144,22 @@ function proto.dissector(buffer, pinfo, tree)
         subtree:add(fields.mode, buffer(mode_id_abs, MODE_LENGTH))
     end
 
+    -- Unknown bytes (4 bytes after mode)
+    local unknown2_abs = get_field_offset(UNKNOWN2_OFFSET)
+    if buffer:len() >= unknown2_abs + UNKNOWN2_LENGTH then
+        subtree:add(fields.unknown_bytes2, buffer(unknown2_abs, UNKNOWN2_LENGTH))
+    end
+    
     -- Brightness parsing
     local brightness_abs = get_field_offset(BRIGHTNESS_OFFSET)
     if buffer:len() >= brightness_abs + BRIGHTNESS_LENGTH then
         subtree:add(fields.brightness, buffer(brightness_abs, BRIGHTNESS_LENGTH))
+    end
+
+    -- Unknown bytes (6 bytes after brightness)
+    local unknown3_abs = get_field_offset(UNKNOWN3_OFFSET)
+    if buffer:len() >= unknown3_abs + UNKNOWN3_LENGTH then
+        subtree:add(fields.unknown_bytes3, buffer(unknown3_abs, UNKNOWN3_LENGTH))
     end
 
     -- Effect direction
@@ -140,6 +172,12 @@ function proto.dissector(buffer, pinfo, tree)
     local effect_breathing_color_abs = get_field_offset(EFFECT_BREATHING_COLOR_OFFSET)
     if buffer:len() >= effect_breathing_color_abs + EFFECT_BREATHING_COLOR_LENGTH then
         subtree:add(fields.effect_breathing_color, buffer(effect_breathing_color_abs, EFFECT_BREATHING_COLOR_LENGTH))
+    end
+
+    -- Unknown bytes (1 byte after breathing color)
+    local unknown4_abs = get_field_offset(UNKNOWN4_OFFSET)
+    if buffer:len() >= unknown4_abs + UNKNOWN4_LENGTH then
+        subtree:add(fields.unknown_bytes4, buffer(unknown4_abs, UNKNOWN4_LENGTH))
     end
 
     -- Effect color
