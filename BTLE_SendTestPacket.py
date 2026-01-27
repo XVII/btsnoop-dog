@@ -19,7 +19,7 @@ sock = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_RAW, socket.BTPROTO_HCI)
 sock.bind((0,))  # hci0
 
 # The packets from the lamp seem to be longer than what is allowed in adv data
-# There are 6 extra bytes that wont fit in adv data length
+# There are 6 extra bytes that won't fit in adv data length
 max_adv_data_len = 31
 
 payload = bytes([
@@ -61,7 +61,8 @@ try:
     while True:
         time.sleep(1)
 except KeyboardInterrupt:
+    print("\nStopped")
+finally:
     # Disable advertising
     sock.send(b'\x01\x0a\x20\x01\x00')
     sock.close()
-    print("\nStopped")

@@ -11,6 +11,6 @@
 	},
 	"settings": {
 		"wiresharkLua.autoRunReplOnActivate": true,
-		"wiresharkLua.tsharkPath": "C:\\Program Files\\Wireshark\\tshark.exe",
+		"wiresharkLua.tsharkPath": "C:\\Program Files\\Wireshark\\tshark.exe"
 	}
 }
