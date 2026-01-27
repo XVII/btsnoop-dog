@@ -81,11 +81,6 @@ local function get_field_offset(relative_offset)
     return MAGIC_OFFSET + relative_offset
 end
 
-local function range_to_hex(range)
-    local bytes = range:bytes()
-    return bytes:tohex(false, "")
-end
-
 -- Function to check if bytes match magic number
 local function check_magic_number(buffer, offset)
     if buffer:len() < offset + MAGIC_LENGTH then
