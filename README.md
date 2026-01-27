@@ -42,10 +42,11 @@ To disconnect a lamp, press its nose five times.
 | Mode | 15 | 47 | 1 byte | Lighting mode (0-10). See table below. |
 | Unknown #2 | 16 | 48 | 4 bytes | Purpose not yet identified |
 | Brightness | 20 | 52 | 2 bytes | Brightness level (0-1000) |
-| Unknown #3 | 22 | 54 | 6 bytes | Purpose not yet identified |
+| Unknown #3 | 22 | 54 | 5 bytes | Purpose not yet identified |
+| MOde (Mirror) | 27 | 59 | 1 byte | A mirror of the Mode field |
 | Effect Direction | 28 | 60 | 1 byte | Direction for effects? |
 | Effect Breathing Color | 29 | 61 | 1 byte | Color for breathing effects. See table below. |
-| Unknown #4 | 30 | 62 | 1 byte | Purpose not yet identified |
+| Effect Fill Color | 30 | 62 | 1 byte | Color for fill effect. Mapping TBD. |
 | Effect Color | 31 | 63 | 1 byte | Color settings. See table below. |
 
 \* Relative to the magic number start (offset 0 = first byte of magic)  

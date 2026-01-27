@@ -12,7 +12,6 @@ local fields            = proto.fields
 fields.unknown_bytes1  = ProtoField.bytes("btle_lxjkbdla.unknown_bytes1", "Unknown Bytes 1", base.COLON)
 fields.unknown_bytes2  = ProtoField.bytes("btle_lxjkbdla.unknown_bytes2", "Unknown Bytes 2", base.COLON)
 fields.unknown_bytes3  = ProtoField.bytes("btle_lxjkbdla.unknown_bytes3", "Unknown Bytes 3", base.COLON)
-fields.unknown_bytes4  = ProtoField.bytes("btle_lxjkbdla.unknown_bytes4", "Unknown Bytes 4", base.COLON)
 
 -- Guessed fields
 fields.expected_length  = ProtoField.string("btle_lxjkbdla.expected_length", "Expected Length", base.NONE)
@@ -29,11 +28,17 @@ fields.mode             = ProtoField.uint8("btle_lxjkbdla.mode", "Mode", base.DE
     { [0] = "Solid Color", [1] = "Sunset", [2] = "Rainbow Flow", [3] = "Fill", [4] = "Knight Rider", [5] =
     "Rainbow Cycle", [6] = "Slow Flow", [7] = "Breathing Rainbow Cycle", [8] = "Chase Solid", [9] = "Strobe", [10] =
     "Segment" })
+fields.mode_mirror      = ProtoField.uint8("btle_lxjkbdla.mode_mirror", "Mode Mirror", base.DEC,
+    { [0] = "Solid Color", [1] = "Sunset", [2] = "Rainbow Flow", [3] = "Fill", [4] = "Knight Rider", [5] =
+    "Rainbow Cycle", [6] = "Slow Flow", [7] = "Breathing Rainbow Cycle", [8] = "Chase Solid", [9] = "Strobe", [10] =
+    "Segment" })
 
 fields.brightness       = ProtoField.uint16("btle_lxjkbdla.brightness", "Brightness", base.DEC)
 fields.effect_direction = ProtoField.bytes("btle_lxjkbdla.effect_direction", "Effect Direction", base.NONE)
 fields.effect_breathing_color = ProtoField.uint8("btle_lxjkbdla.effect_breathing_color", "Breathing Color", base.DEC,
     { [0] = "Red", [1] = "Green", [2] = "Blue", [3] = "Yellow", [4] = "Purple", [5] = "Cyan", [6] = "Cool White", [7] = "Warm Yellow", [8] = "Pink"  })
+fields.effect_fill_color = ProtoField.uint8("btle_lxjkbdla.effect_fill_color", "Fill Color", base.DEC,
+    { [0] = "0", [1] = "1", [2] = "2", [3] = "3", [4] = "4", [5] = "5", [6] = "6", [7] = "7", [8] = "8"  })
 fields.effect_color     = ProtoField.uint8("btle_lxjkbdla.effect_color", "Effect Color", base.DEC, 
     { [0] = "Cool White", [1] = "Warm White", [2] = "Blue", [3] = "Orange", [4] = "Purple", [5] = "Pink", [6] = "Red", [7] = "Yellow", [8] = "Green" })
 
@@ -53,20 +58,22 @@ local SEQUENCE_ID_OFFSET = MAGIC_LENGTH + 8
 local SEQUENCE_ID_LENGTH = 1
 local POWER_STATE_OFFSET = MAGIC_LENGTH + 9
 local POWER_STATE_LENGTH = 1
-local MODE_OFFSET = MAGIC_LENGTH + 10                         -- Also seems to be at byte +22 and +23?
+local MODE_OFFSET = MAGIC_LENGTH + 10
 local MODE_LENGTH = 1
 local UNKNOWN2_OFFSET = MAGIC_LENGTH + 11
 local UNKNOWN2_LENGTH = 4
 local BRIGHTNESS_OFFSET = MAGIC_LENGTH + 15
 local BRIGHTNESS_LENGTH = 2
 local UNKNOWN3_OFFSET = MAGIC_LENGTH + 17
-local UNKNOWN3_LENGTH = 6
+local UNKNOWN3_LENGTH = 5
+local MODE_MIRROR_OFFSET = MAGIC_LENGTH + 22
+local MODE_MIRROR_LENGTH = 1
 local EFFECT_DIRECTION_OFFSET = MAGIC_LENGTH + 23
 local EFFECT_DIRECTION_LENGTH = 1
 local EFFECT_BREATHING_COLOR_OFFSET = MAGIC_LENGTH + 24
 local EFFECT_BREATHING_COLOR_LENGTH = 1
-local UNKNOWN4_OFFSET = MAGIC_LENGTH + 25
-local UNKNOWN4_LENGTH = 1
+local EFFECT_FILL_COLOR_OFFSET = MAGIC_LENGTH + 25
+local EFFECT_FILL_COLOR_LENGTH = 1
 local EFFECT_COLOR_OFFSET = MAGIC_LENGTH + 26                   -- This is a sub-mode for more than just colour -- need to map them out
 local EFFECT_COLOR_LENGTH = 1
 
@@ -149,17 +156,23 @@ function proto.dissector(buffer, pinfo, tree)
     if buffer:len() >= unknown2_abs + UNKNOWN2_LENGTH then
         subtree:add(fields.unknown_bytes2, buffer(unknown2_abs, UNKNOWN2_LENGTH))
     end
-    
+
     -- Brightness parsing
     local brightness_abs = get_field_offset(BRIGHTNESS_OFFSET)
     if buffer:len() >= brightness_abs + BRIGHTNESS_LENGTH then
         subtree:add(fields.brightness, buffer(brightness_abs, BRIGHTNESS_LENGTH))
     end
 
-    -- Unknown bytes (6 bytes after brightness)
+    -- Unknown bytes
     local unknown3_abs = get_field_offset(UNKNOWN3_OFFSET)
     if buffer:len() >= unknown3_abs + UNKNOWN3_LENGTH then
         subtree:add(fields.unknown_bytes3, buffer(unknown3_abs, UNKNOWN3_LENGTH))
+    end
+
+    -- Mode mirror parsing
+    local mode_mirror_abs = get_field_offset(MODE_MIRROR_OFFSET)
+    if buffer:len() >= mode_mirror_abs + MODE_MIRROR_LENGTH then
+        subtree:add(fields.mode_mirror, buffer(mode_mirror_abs, MODE_MIRROR_LENGTH))
     end
 
     -- Effect direction
@@ -174,10 +187,10 @@ function proto.dissector(buffer, pinfo, tree)
         subtree:add(fields.effect_breathing_color, buffer(effect_breathing_color_abs, EFFECT_BREATHING_COLOR_LENGTH))
     end
 
-    -- Unknown bytes (1 byte after breathing color)
-    local unknown4_abs = get_field_offset(UNKNOWN4_OFFSET)
-    if buffer:len() >= unknown4_abs + UNKNOWN4_LENGTH then
-        subtree:add(fields.unknown_bytes4, buffer(unknown4_abs, UNKNOWN4_LENGTH))
+    -- Effect fill color
+    local effect_fill_color_abs = get_field_offset(EFFECT_FILL_COLOR_OFFSET)
+    if buffer:len() >= effect_fill_color_abs + EFFECT_FILL_COLOR_LENGTH then
+        subtree:add(fields.effect_fill_color, buffer(effect_fill_color_abs, EFFECT_FILL_COLOR_LENGTH))
     end
 
     -- Effect color
