@@ -38,11 +38,15 @@ To disconnect a lamp, press its nose five times.
 | Lamp Group ID | 5 | 37 | 6 bytes | Device group identifier (represents 1 or more lamps) |
 | Unknown | 11 | 43 | 2 bytes | Purpose not yet identified |
 | Sequence ID | 13 | 45 | 1 byte | Counter (0-255). Used to prevent issues with out of order BLE packets? |
+| Power State | 14 | 46 | 1 byte | 0=Off, 1=On |
 | Mode | 15 | 47 | 1 byte | Lighting mode (0-10). See table below. |
+| Unknown | 16 | 48 | 4 bytes | Purpose not yet identified |
 | Brightness | 20 | 52 | 2 bytes | Brightness level (0-1000) |
+| Unknown | 22 | 54 | 6 bytes | Purpose not yet identified |
 | Effect Direction | 28 | 60 | 1 byte | Direction for effects? |
-| Unknown | 29-30 | 61-62 | 2 bytes | Purpose not yet identified |
-| Sunset Mode | 31 | 63 | 1 byte | 0=Cool, 1=Warm |
+| Effect Breathing Color | 29 | 61 | 1 byte | Color for breathing effects. See table below. |
+| Unknown | 30 | 62 | 1 byte | Purpose not yet identified |
+| Effect Color | 31 | 63 | 1 byte | Color settings. See table below. |
 
 \* Relative to the magic number start (offset 0 = first byte of magic)  
 \*\* Absolute offset in the BLE packet
@@ -72,9 +76,30 @@ To disconnect a lamp, press its nose five times.
 | 9 | Strobe |
 | 10 | Segment |
 
-## Sunset Mode Values
+## Effect Breathing Color Values
 
 | Value | Description |
 |-------|-------------|
-| 0 | Cool |
-| 1 | Warm |
+| 0 | Red |
+| 1 | Green |
+| 2 | Blue |
+| 3 | Yellow |
+| 4 | Purple |
+| 5 | Cyan |
+| 6 | Cool White |
+| 7 | Warm Yellow |
+| 8 | Pink |
+
+## Effect Color Values
+
+| Value | Description |
+|-------|-------------|
+| 0 | Cool White |
+| 1 | Warm White |
+| 2 | Blue |
+| 3 | Orange |
+| 4 | Purple |
+| 5 | Pink |
+| 6 | Red |
+| 7 | Yellow |
+| 8 | Green |
