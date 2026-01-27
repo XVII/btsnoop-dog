@@ -61,7 +61,8 @@ try:
     while True:
         time.sleep(1)
 except KeyboardInterrupt:
+    print("\nStopped")
+finally:
     # Disable advertising
     sock.send(b'\x01\x0a\x20\x01\x00')
     sock.close()
-    print("\nStopped")
