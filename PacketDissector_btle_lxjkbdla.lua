@@ -9,37 +9,37 @@ local proto        = Proto("btle_lxjkbdla", "BLE Lexon x Jeff Koons Balloon Dog 
 local fields            = proto.fields
 
 -- Unknown Fields
-fields.unknown_bytes1  = ProtoField.bytes("btle_lxjkbdla.unknown_bytes1", "Unknown Bytes 1", base.COLON)
-fields.unknown_bytes2  = ProtoField.bytes("btle_lxjkbdla.unknown_bytes2", "Unknown Bytes 2", base.COLON)
-fields.unknown_bytes3  = ProtoField.bytes("btle_lxjkbdla.unknown_bytes3", "Unknown Bytes 3", base.COLON)
+fields.unknown_bytes1  = ProtoField.bytes(proto.name .. ".unknown_bytes1", "Unknown Bytes 1", base.COLON)
+fields.unknown_bytes2  = ProtoField.bytes(proto.name .. ".unknown_bytes2", "Unknown Bytes 2", base.COLON)
+fields.unknown_bytes3  = ProtoField.bytes(proto.name .. ".unknown_bytes3", "Unknown Bytes 3", base.COLON)
 
 -- Guessed fields
-fields.expected_length  = ProtoField.string("btle_lxjkbdla.expected_length", "Expected Length", base.NONE)
-fields.lamp_group_id    = ProtoField.bytes("btle_lxjkbdla.lamp_group_id", "Lamp Group ID", base.COLON)
-fields.sequence_id      = ProtoField.uint8("btle_lxjkbdla.sequence_id", "Sequence ID (0-255)", base.DEC)
+fields.expected_length  = ProtoField.string(proto.name .. ".expected_length", "Expected Length", base.NONE)
+fields.lamp_group_id    = ProtoField.bytes(proto.name .. ".lamp_group_id", "Lamp Group ID", base.COLON)
+fields.sequence_id      = ProtoField.uint8(proto.name .. ".sequence_id", "Sequence ID (0-255)", base.DEC)
 
-fields.all_bytes       = ProtoField.bytes("btle_lxjkbdla.all_bytes", "All Bytes", base.COLON)
-fields.all_bytes_index = ProtoField.bytes("btle_lxjkbdla.all_bytes_index", "Hex Index", base.COLON)
+fields.all_bytes       = ProtoField.bytes(proto.name .. ".all_bytes", "All Bytes", base.COLON)
+fields.all_bytes_index = ProtoField.bytes(proto.name .. ".all_bytes_index", "Hex Index", base.COLON)
 
 -- Guessed Light Fields
-fields.power_state       = ProtoField.uint8("btle_lxjkbdla.power_state", "Power State", base.DEC,
+fields.power_state       = ProtoField.uint8(proto.name .. ".power_state", "Power State", base.DEC,
     { [0] = "Off", [1] = "On" })
-fields.mode             = ProtoField.uint8("btle_lxjkbdla.mode", "Mode", base.DEC,
+fields.mode             = ProtoField.uint8(proto.name .. ".mode", "Mode", base.DEC,
     { [0] = "Solid Color", [1] = "Sunset", [2] = "Rainbow Flow", [3] = "Fill", [4] = "Knight Rider", [5] =
     "Rainbow Cycle", [6] = "Slow Flow", [7] = "Breathing Rainbow Cycle", [8] = "Chase Solid", [9] = "Strobe", [10] =
     "Segment" })
-fields.mode_mirror      = ProtoField.uint8("btle_lxjkbdla.mode_mirror", "Mode Mirror", base.DEC,
+fields.mode_mirror      = ProtoField.uint8(proto.name .. ".mode_mirror", "Mode Mirror", base.DEC,
     { [0] = "Solid Color", [1] = "Sunset", [2] = "Rainbow Flow", [3] = "Fill", [4] = "Knight Rider", [5] =
     "Rainbow Cycle", [6] = "Slow Flow", [7] = "Breathing Rainbow Cycle", [8] = "Chase Solid", [9] = "Strobe", [10] =
     "Segment" })
 
-fields.brightness       = ProtoField.uint16("btle_lxjkbdla.brightness", "Brightness", base.DEC)
-fields.effect_direction = ProtoField.bytes("btle_lxjkbdla.effect_direction", "Effect Direction", base.NONE)
-fields.effect_breathing_color = ProtoField.uint8("btle_lxjkbdla.effect_breathing_color", "Breathing Color", base.DEC,
+fields.brightness       = ProtoField.uint16(proto.name .. ".brightness", "Brightness", base.DEC)
+fields.effect_direction = ProtoField.bytes(proto.name .. ".effect_direction", "Effect Direction", base.NONE)
+fields.effect_breathing_color = ProtoField.uint8(proto.name .. ".effect_breathing_color", "Breathing Color", base.DEC,
     { [0] = "Red", [1] = "Green", [2] = "Blue", [3] = "Yellow", [4] = "Purple", [5] = "Cyan", [6] = "Cool White", [7] = "Warm Yellow", [8] = "Pink"  })
-fields.effect_fill_color = ProtoField.uint8("btle_lxjkbdla.effect_fill_color", "Fill Color", base.DEC,
+fields.effect_fill_color = ProtoField.uint8(proto.name .. ".effect_fill_color", "Fill Color", base.DEC,
     { [0] = "0", [1] = "1", [2] = "2", [3] = "3", [4] = "4", [5] = "5", [6] = "6", [7] = "7", [8] = "8"  })
-fields.effect_color     = ProtoField.uint8("btle_lxjkbdla.effect_color", "Effect Color", base.DEC, 
+fields.effect_color     = ProtoField.uint8(proto.name .. ".effect_color", "Effect Color", base.DEC, 
     { [0] = "Cool White", [1] = "Warm White", [2] = "Blue", [3] = "Orange", [4] = "Purple", [5] = "Pink", [6] = "Red", [7] = "Yellow", [8] = "Green" })
 
 -- Define the magic number and offsets
@@ -49,32 +49,22 @@ local BTLE_CRC_LENGTH  = 3  -- BTLE CRC at end of packet
 local MAGIC_NUMBER     = { 0x21, 0x48, 0x52, 0x52, 0x46 }
 local MAGIC_LENGTH     = #MAGIC_NUMBER
 
-local LAMP_GROUP_ID_OFFSET = MAGIC_LENGTH
-local LAMP_GROUP_ID_LENGTH = 6
-local UNKNOWN1_OFFSET = MAGIC_LENGTH + 6
-local UNKNOWN1_LENGTH = 2
-local SEQUENCE_ID_OFFSET = MAGIC_LENGTH + 8
-local SEQUENCE_ID_LENGTH = 1
-local POWER_STATE_OFFSET = MAGIC_LENGTH + 9
-local POWER_STATE_LENGTH = 1
-local MODE_OFFSET = MAGIC_LENGTH + 10
-local MODE_LENGTH = 1
-local UNKNOWN2_OFFSET = MAGIC_LENGTH + 11
-local UNKNOWN2_LENGTH = 4
-local BRIGHTNESS_OFFSET = MAGIC_LENGTH + 15
-local BRIGHTNESS_LENGTH = 2
-local UNKNOWN3_OFFSET = MAGIC_LENGTH + 17
-local UNKNOWN3_LENGTH = 5
-local MODE_MIRROR_OFFSET = MAGIC_LENGTH + 22
-local MODE_MIRROR_LENGTH = 1
-local EFFECT_DIRECTION_OFFSET = MAGIC_LENGTH + 23
-local EFFECT_DIRECTION_LENGTH = 1
-local EFFECT_BREATHING_COLOR_OFFSET = MAGIC_LENGTH + 24
-local EFFECT_BREATHING_COLOR_LENGTH = 1
-local EFFECT_FILL_COLOR_OFFSET = MAGIC_LENGTH + 25
-local EFFECT_FILL_COLOR_LENGTH = 1
-local EFFECT_COLOR_OFFSET = MAGIC_LENGTH + 26                   -- This is a sub-mode for more than just colour -- need to map them out
-local EFFECT_COLOR_LENGTH = 1
+-- Field definitions: offset (relative to magic) and length
+local FIELD_DEFS = {
+    lamp_group_id = { offset = MAGIC_LENGTH, length = 6 },
+    unknown1 = { offset = MAGIC_LENGTH + 6, length = 2 },
+    sequence_id = { offset = MAGIC_LENGTH + 8, length = 1 },
+    power_state = { offset = MAGIC_LENGTH + 9, length = 1 },
+    mode = { offset = MAGIC_LENGTH + 10, length = 1 },
+    unknown2 = { offset = MAGIC_LENGTH + 11, length = 4 },
+    brightness = { offset = MAGIC_LENGTH + 15, length = 2 },
+    unknown3 = { offset = MAGIC_LENGTH + 17, length = 5 },
+    mode_mirror = { offset = MAGIC_LENGTH + 22, length = 1 },
+    effect_direction = { offset = MAGIC_LENGTH + 23, length = 1 },
+    effect_breathing_color = { offset = MAGIC_LENGTH + 24, length = 1 },
+    effect_fill_color = { offset = MAGIC_LENGTH + 25, length = 1 },
+    effect_color = { offset = MAGIC_LENGTH + 26, length = 1 }, -- This is a sub-mode for more than just colour
+}
 
 
 -- Function to check if bytes match magic number
@@ -122,83 +112,29 @@ function proto.dissector(buffer, pinfo, tree)
     -- Create main subtree
     local subtree = tree:add(proto, buffer(), "Lexon x Jeff Koons Balloon Dog Lamp Data")
 
-    -- Lamp Group ID (6 bytes after magic)
-    local lamp_group_abs = magic_offset + LAMP_GROUP_ID_OFFSET
-    if buffer:len() >= lamp_group_abs + LAMP_GROUP_ID_LENGTH then
-        subtree:add(fields.lamp_group_id, buffer(lamp_group_abs, LAMP_GROUP_ID_LENGTH))
+    -- Helper function to add field if buffer has enough data
+    local function add_field(field_name, proto_field)
+        local def = FIELD_DEFS[field_name]
+        local abs_offset = magic_offset + def.offset
+        if buffer:len() >= abs_offset + def.length then
+            subtree:add(proto_field, buffer(abs_offset, def.length))
+        end
     end
 
-    -- Unknown bytes (2 bytes after lamp group ID)
-    local unknown1_abs = magic_offset + UNKNOWN1_OFFSET
-    if buffer:len() >= unknown1_abs + UNKNOWN1_LENGTH then
-        subtree:add(fields.unknown_bytes1, buffer(unknown1_abs, UNKNOWN1_LENGTH))
-    end
-
-    -- Sequence ID (after lamp group ID + 2 unknown bytes)
-    local sequence_id_abs = magic_offset + SEQUENCE_ID_OFFSET
-    if buffer:len() >= sequence_id_abs + SEQUENCE_ID_LENGTH then
-        subtree:add(fields.sequence_id, buffer(sequence_id_abs, SEQUENCE_ID_LENGTH))
-    end
-
-    -- Power state parsing
-    local power_state_abs = magic_offset + POWER_STATE_OFFSET
-    if buffer:len() >= power_state_abs + POWER_STATE_LENGTH then
-        subtree:add(fields.power_state, buffer(power_state_abs, POWER_STATE_LENGTH))
-    end
-
-    -- Mode parsing and info column formatting
-    local mode_id_abs = magic_offset + MODE_OFFSET
-    if buffer:len() >= mode_id_abs + MODE_LENGTH then
-        subtree:add(fields.mode, buffer(mode_id_abs, MODE_LENGTH))
-    end
-
-    -- Unknown bytes (4 bytes after mode)
-    local unknown2_abs = magic_offset + UNKNOWN2_OFFSET
-    if buffer:len() >= unknown2_abs + UNKNOWN2_LENGTH then
-        subtree:add(fields.unknown_bytes2, buffer(unknown2_abs, UNKNOWN2_LENGTH))
-    end
-
-    -- Brightness parsing
-    local brightness_abs = magic_offset + BRIGHTNESS_OFFSET
-    if buffer:len() >= brightness_abs + BRIGHTNESS_LENGTH then
-        subtree:add(fields.brightness, buffer(brightness_abs, BRIGHTNESS_LENGTH))
-    end
-
-    -- Unknown bytes
-    local unknown3_abs = magic_offset + UNKNOWN3_OFFSET
-    if buffer:len() >= unknown3_abs + UNKNOWN3_LENGTH then
-        subtree:add(fields.unknown_bytes3, buffer(unknown3_abs, UNKNOWN3_LENGTH))
-    end
-
-    -- Mode mirror parsing
-    local mode_mirror_abs = magic_offset + MODE_MIRROR_OFFSET
-    if buffer:len() >= mode_mirror_abs + MODE_MIRROR_LENGTH then
-        subtree:add(fields.mode_mirror, buffer(mode_mirror_abs, MODE_MIRROR_LENGTH))
-    end
-
-    -- Effect direction
-    local effect_direction_abs = magic_offset + EFFECT_DIRECTION_OFFSET
-    if buffer:len() >= effect_direction_abs + EFFECT_DIRECTION_LENGTH then
-        subtree:add(fields.effect_direction, buffer(effect_direction_abs, EFFECT_DIRECTION_LENGTH))
-    end
-
-    -- Effect breathing color
-    local effect_breathing_color_abs = magic_offset + EFFECT_BREATHING_COLOR_OFFSET
-    if buffer:len() >= effect_breathing_color_abs + EFFECT_BREATHING_COLOR_LENGTH then
-        subtree:add(fields.effect_breathing_color, buffer(effect_breathing_color_abs, EFFECT_BREATHING_COLOR_LENGTH))
-    end
-
-    -- Effect fill color
-    local effect_fill_color_abs = magic_offset + EFFECT_FILL_COLOR_OFFSET
-    if buffer:len() >= effect_fill_color_abs + EFFECT_FILL_COLOR_LENGTH then
-        subtree:add(fields.effect_fill_color, buffer(effect_fill_color_abs, EFFECT_FILL_COLOR_LENGTH))
-    end
-
-    -- Effect color
-    local effect_color_abs = magic_offset + EFFECT_COLOR_OFFSET
-    if buffer:len() >= effect_color_abs + EFFECT_COLOR_LENGTH then
-        subtree:add(fields.effect_color, buffer(effect_color_abs, EFFECT_COLOR_LENGTH))
-    end
+    -- Parse all fields
+    add_field("lamp_group_id", fields.lamp_group_id)
+    add_field("unknown1", fields.unknown_bytes1)
+    add_field("sequence_id", fields.sequence_id)
+    add_field("power_state", fields.power_state)
+    add_field("mode", fields.mode)
+    add_field("unknown2", fields.unknown_bytes2)
+    add_field("brightness", fields.brightness)
+    add_field("unknown3", fields.unknown_bytes3)
+    add_field("mode_mirror", fields.mode_mirror)
+    add_field("effect_direction", fields.effect_direction)
+    add_field("effect_breathing_color", fields.effect_breathing_color)
+    add_field("effect_fill_color", fields.effect_fill_color)
+    add_field("effect_color", fields.effect_color)
 
     -- All bytes post-magic (everything after magic number for debugging)
     local all_bytes_abs = magic_offset + MAGIC_LENGTH
