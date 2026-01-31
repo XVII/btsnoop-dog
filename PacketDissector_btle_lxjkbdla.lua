@@ -42,15 +42,14 @@ fields.effect_fill_color = ProtoField.uint8("btle_lxjkbdla.effect_fill_color", "
 fields.effect_color     = ProtoField.uint8("btle_lxjkbdla.effect_color", "Effect Color", base.DEC, 
     { [0] = "Cool White", [1] = "Warm White", [2] = "Blue", [3] = "Orange", [4] = "Purple", [5] = "Pink", [6] = "Red", [7] = "Yellow", [8] = "Green" })
 
--- Define the magic number and offsets (all offsets relative to MAGIC_OFFSET)
+-- Define the magic number and offsets
+local EXPECTED_LENGTH  = 27 -- Payload after magic (32 total - 5 magic)
+local BTLE_CRC_LENGTH  = 3  -- BTLE CRC at end of packet
+
 local MAGIC_NUMBER     = { 0x21, 0x48, 0x52, 0x52, 0x46 }
 local MAGIC_LENGTH     = #MAGIC_NUMBER
-local MAGIC_OFFSET     = 32 -- absolute offset in packet // TODO: This may vary based on where the adv data is located and what flags are set, should probably be detected dynamically
 
-local EXPECTED_LENGTH = 64 - MAGIC_OFFSET + 3 -- 3 extra bytes for BTLE CRC
-
--- Offsets relative to MAGIC_OFFSET
-local LAMP_GROUP_ID_OFFSET = MAGIC_LENGTH                       -- immediately after magic
+local LAMP_GROUP_ID_OFFSET = MAGIC_LENGTH
 local LAMP_GROUP_ID_LENGTH = 6
 local UNKNOWN1_OFFSET = MAGIC_LENGTH + 6
 local UNKNOWN1_LENGTH = 2
@@ -77,9 +76,6 @@ local EFFECT_FILL_COLOR_LENGTH = 1
 local EFFECT_COLOR_OFFSET = MAGIC_LENGTH + 26                   -- This is a sub-mode for more than just colour -- need to map them out
 local EFFECT_COLOR_LENGTH = 1
 
-local function get_field_offset(relative_offset)
-    return MAGIC_OFFSET + relative_offset
-end
 
 -- Function to check if bytes match magic number
 local function check_magic_number(buffer, offset)
@@ -96,106 +92,116 @@ local function check_magic_number(buffer, offset)
     return true
 end
 
+-- Function to find magic number offset in buffer
+local function find_magic_offset(buffer)
+    for offset = 0, buffer:len() - MAGIC_LENGTH do
+        if check_magic_number(buffer, offset) then
+            return offset
+        end
+    end
+    return nil
+end
+
 -- Dissector function
 function proto.dissector(buffer, pinfo, tree)
     -- Check if buffer has sufficient length for magic number
-    if buffer:len() < MAGIC_OFFSET + MAGIC_LENGTH then
+    if buffer:len() < MAGIC_LENGTH then
         return 0
     end
 
     -- Check for magic number in advertisement data
-    local has_magic = check_magic_number(buffer, MAGIC_OFFSET)
+    local magic_offset = find_magic_offset(buffer)
 
-    if not has_magic then
+    if not magic_offset then
         return 0
     end
 
     -- Set protocol in column
-    pinfo.cols.protocol = "BLE Lexon x Jeff Koons Balloon Dog Lamp Protocol"
+    pinfo.cols.protocol = "BLE Lexon x Jeff Koons Balloon Dog Lamp Protocol (Offset: " .. magic_offset .. ")"
 
     -- Create main subtree
     local subtree = tree:add(proto, buffer(), "Lexon x Jeff Koons Balloon Dog Lamp Data")
 
     -- Lamp Group ID (6 bytes after magic)
-    local lamp_group_abs = get_field_offset(LAMP_GROUP_ID_OFFSET)
+    local lamp_group_abs = magic_offset + LAMP_GROUP_ID_OFFSET
     if buffer:len() >= lamp_group_abs + LAMP_GROUP_ID_LENGTH then
         subtree:add(fields.lamp_group_id, buffer(lamp_group_abs, LAMP_GROUP_ID_LENGTH))
     end
 
     -- Unknown bytes (2 bytes after lamp group ID)
-    local unknown1_abs = get_field_offset(UNKNOWN1_OFFSET)
+    local unknown1_abs = magic_offset + UNKNOWN1_OFFSET
     if buffer:len() >= unknown1_abs + UNKNOWN1_LENGTH then
         subtree:add(fields.unknown_bytes1, buffer(unknown1_abs, UNKNOWN1_LENGTH))
     end
 
     -- Sequence ID (after lamp group ID + 2 unknown bytes)
-    local sequence_id_abs = get_field_offset(SEQUENCE_ID_OFFSET)
+    local sequence_id_abs = magic_offset + SEQUENCE_ID_OFFSET
     if buffer:len() >= sequence_id_abs + SEQUENCE_ID_LENGTH then
         subtree:add(fields.sequence_id, buffer(sequence_id_abs, SEQUENCE_ID_LENGTH))
     end
 
     -- Power state parsing
-    local power_state_abs = get_field_offset(POWER_STATE_OFFSET)
+    local power_state_abs = magic_offset + POWER_STATE_OFFSET
     if buffer:len() >= power_state_abs + POWER_STATE_LENGTH then
         subtree:add(fields.power_state, buffer(power_state_abs, POWER_STATE_LENGTH))
     end
 
     -- Mode parsing and info column formatting
-    local mode_id_abs = get_field_offset(MODE_OFFSET)
+    local mode_id_abs = magic_offset + MODE_OFFSET
     if buffer:len() >= mode_id_abs + MODE_LENGTH then
         subtree:add(fields.mode, buffer(mode_id_abs, MODE_LENGTH))
     end
 
     -- Unknown bytes (4 bytes after mode)
-    local unknown2_abs = get_field_offset(UNKNOWN2_OFFSET)
+    local unknown2_abs = magic_offset + UNKNOWN2_OFFSET
     if buffer:len() >= unknown2_abs + UNKNOWN2_LENGTH then
         subtree:add(fields.unknown_bytes2, buffer(unknown2_abs, UNKNOWN2_LENGTH))
     end
 
     -- Brightness parsing
-    local brightness_abs = get_field_offset(BRIGHTNESS_OFFSET)
+    local brightness_abs = magic_offset + BRIGHTNESS_OFFSET
     if buffer:len() >= brightness_abs + BRIGHTNESS_LENGTH then
         subtree:add(fields.brightness, buffer(brightness_abs, BRIGHTNESS_LENGTH))
     end
 
     -- Unknown bytes
-    local unknown3_abs = get_field_offset(UNKNOWN3_OFFSET)
+    local unknown3_abs = magic_offset + UNKNOWN3_OFFSET
     if buffer:len() >= unknown3_abs + UNKNOWN3_LENGTH then
         subtree:add(fields.unknown_bytes3, buffer(unknown3_abs, UNKNOWN3_LENGTH))
     end
 
     -- Mode mirror parsing
-    local mode_mirror_abs = get_field_offset(MODE_MIRROR_OFFSET)
+    local mode_mirror_abs = magic_offset + MODE_MIRROR_OFFSET
     if buffer:len() >= mode_mirror_abs + MODE_MIRROR_LENGTH then
         subtree:add(fields.mode_mirror, buffer(mode_mirror_abs, MODE_MIRROR_LENGTH))
     end
 
     -- Effect direction
-    local effect_direction_abs = get_field_offset(EFFECT_DIRECTION_OFFSET)
+    local effect_direction_abs = magic_offset + EFFECT_DIRECTION_OFFSET
     if buffer:len() >= effect_direction_abs + EFFECT_DIRECTION_LENGTH then
         subtree:add(fields.effect_direction, buffer(effect_direction_abs, EFFECT_DIRECTION_LENGTH))
     end
 
     -- Effect breathing color
-    local effect_breathing_color_abs = get_field_offset(EFFECT_BREATHING_COLOR_OFFSET)
+    local effect_breathing_color_abs = magic_offset + EFFECT_BREATHING_COLOR_OFFSET
     if buffer:len() >= effect_breathing_color_abs + EFFECT_BREATHING_COLOR_LENGTH then
         subtree:add(fields.effect_breathing_color, buffer(effect_breathing_color_abs, EFFECT_BREATHING_COLOR_LENGTH))
     end
 
     -- Effect fill color
-    local effect_fill_color_abs = get_field_offset(EFFECT_FILL_COLOR_OFFSET)
+    local effect_fill_color_abs = magic_offset + EFFECT_FILL_COLOR_OFFSET
     if buffer:len() >= effect_fill_color_abs + EFFECT_FILL_COLOR_LENGTH then
         subtree:add(fields.effect_fill_color, buffer(effect_fill_color_abs, EFFECT_FILL_COLOR_LENGTH))
     end
 
     -- Effect color
-    local effect_color_abs = get_field_offset(EFFECT_COLOR_OFFSET)
+    local effect_color_abs = magic_offset + EFFECT_COLOR_OFFSET
     if buffer:len() >= effect_color_abs + EFFECT_COLOR_LENGTH then
         subtree:add(fields.effect_color, buffer(effect_color_abs, EFFECT_COLOR_LENGTH))
     end
 
     -- All bytes post-magic (everything after magic number for debugging)
-    local all_bytes_abs = get_field_offset(MAGIC_LENGTH)
+    local all_bytes_abs = magic_offset + MAGIC_LENGTH
     if buffer:len() > all_bytes_abs then
         local all_bytes = buffer(all_bytes_abs, buffer:len() - all_bytes_abs)
         subtree:add(fields.all_bytes, all_bytes)
@@ -213,20 +219,20 @@ function proto.dissector(buffer, pinfo, tree)
         end
     end
 
-    -- Check for unexpected data length
-    local expected_abs = get_field_offset(EXPECTED_LENGTH)
-    if buffer:len() > expected_abs then
+    -- Check for unexpected data length (excluding BTLE CRC)
+    local payload_length = buffer:len() - magic_offset - MAGIC_LENGTH - BTLE_CRC_LENGTH
+    if payload_length > EXPECTED_LENGTH then
         subtree:add(fields.expected_length,
-            "Longer: Buffer length (" ..
-            buffer:len() ..
-            " bytes) exceeds expected (" .. expected_abs .. " bytes) - possibly an undiscovered format variant")
-    elseif buffer:len() == expected_abs then
-        subtree:add(fields.expected_length, "Standard")
-    elseif buffer:len() < expected_abs then
+            "Longer: Payload length (" ..
+            payload_length ..
+            " bytes) exceeds expected (" .. EXPECTED_LENGTH .. " bytes)")
+    elseif payload_length == EXPECTED_LENGTH then
+        subtree:add(fields.expected_length, "Yes")
+    elseif payload_length < EXPECTED_LENGTH then
         subtree:add(fields.expected_length,
-            "Shorter: Buffer length (" ..
-            buffer:len() ..
-            " bytes) less than expected (" .. expected_abs .. " bytes) - possibly an undiscovered format variant")
+            "Shorter: Payload length (" ..
+            payload_length ..
+            " bytes) less than expected (" .. EXPECTED_LENGTH .. " bytes)")
     end
 
     return buffer:len()
