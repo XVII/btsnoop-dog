@@ -10,6 +10,8 @@ Model No: `LX-JK-BDL-A`
 
 FCC ID: `2ARD3-LXJKBDLA` (01/21/2026)
 
+Bluetooth SoC IC: `ST17H66B2`
+
 ## Resources
 
 - [Manual](https://www.lexon-design.com/media/documents/manuals/bdl-balloon-dog-lamp-user-guide-2025.pdf)
