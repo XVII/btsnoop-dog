@@ -119,8 +119,8 @@ for _, def in ipairs(FIELD_DEFS) do
 end
 
 -- Additional debug/utility fields
-fields.all_bytes = ProtoField.bytes(proto.name .. ".all_bytes", "All Bytes", base.COLON)
-fields.all_bytes_index = ProtoField.bytes(proto.name .. ".all_bytes_index", "Hex Index", base.COLON)
+fields.payload_bytes = ProtoField.bytes(proto.name .. ".payload_bytes", "Payload Bytes", base.COLON)
+fields.payload_index = ProtoField.bytes(proto.name .. ".payload_index", "   Byte Index", base.COLON)
 fields.expected_length = ProtoField.string(proto.name .. ".expected_length", "Expected Length", base.NONE)
 
 
@@ -177,14 +177,14 @@ function proto.dissector(buffer, pinfo, tree)
         end
     end
 
-    -- All bytes post-magic (everything after magic number for debugging)
-    local all_bytes_abs = magic_offset + MAGIC_LENGTH
-    if buffer:len() > all_bytes_abs then
-        local all_bytes = buffer(all_bytes_abs, buffer:len() - all_bytes_abs)
-        subtree:add(fields.all_bytes, all_bytes)
+    -- Payload bytes post-magic (everything after magic number for debugging)
+    local payload_bytes_abs = magic_offset + MAGIC_LENGTH
+    if buffer:len() > payload_bytes_abs then
+        local payload_bytes = buffer(payload_bytes_abs, buffer:len() - payload_bytes_abs - BTLE_CRC_LENGTH)
+        subtree:add(fields.payload_bytes, payload_bytes)
 
         -- Add indexed bytes
-        local idx_len = all_bytes:len()
+        local idx_len = payload_bytes:len()
         if idx_len > 0 then
             local idx_hex = {}
             for i = 0, idx_len - 1 do
@@ -192,7 +192,7 @@ function proto.dissector(buffer, pinfo, tree)
             end
             local idx_ba = ByteArray.new(table.concat(idx_hex))
             local idx_tvb = idx_ba:tvb("Ref_IndexBytes")
-            subtree:add(fields.all_bytes_index, idx_tvb(0, idx_len))
+            subtree:add(fields.payload_index, idx_tvb(0, idx_len))
         end
     end
 
