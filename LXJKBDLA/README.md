@@ -20,6 +20,11 @@ Bluetooth SoC IC: `ST17H66`
 
 To disconnect a lamp, press its nose five times.
 
+### Development
+
+A symlink will help Wireshark find the dissector script from your cloned repo. 
+`ln -s ~/btsnoop-dog/LXJKBDLA/receiver/PacketDissector_btle_lxjkbdla.lua ~/.local/lib/wireshark/plugins/PacketDissector_btle_lxjkbdla.lua`
+
 # Payload Analysis
 
 ## Initial Notes
