@@ -1,8 +1,4 @@
-# btsnoop-dog
-
-LXJK-BDLA Bluetooth Control Protocol
-
-Looking to reverse engineer the control protocol for the LX/JK Balloon Dog Lamp. Message me if you're interested/able to help out :)
+# LXJK-BDLA
 
 ## Target Device
 
@@ -10,7 +6,7 @@ Model No: `LX-JK-BDL-A`
 
 FCC ID: `2ARD3-LXJKBDLA` (01/21/2026)
 
-Bluetooth SoC IC: `ST17H66B2`
+Bluetooth SoC IC: `ST17H66`
 
 ## Resources
 
@@ -106,3 +102,12 @@ To disconnect a lamp, press its nose five times.
 | 6 | Red |
 | 7 | Yellow |
 | 8 | Green |
+
+# Internal Photos
+Images are property of Microtest.
+![](photos/18.jpg)
+![](photos/19.jpg)
+![](photos/20.jpg)
+![](photos/21.jpg)
+![](photos/25.jpg)
+![](photos/26.jpg)
