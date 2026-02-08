@@ -17,9 +17,29 @@ DBUS_OM_IFACE = 'org.freedesktop.DBus.ObjectManager'
 DBUS_PROP_IFACE = 'org.freedesktop.DBus.Properties'
 LE_ADVERTISEMENT_IFACE = 'org.bluez.LEAdvertisement1'
 
+COMPANY_ID = dbus.UInt16(0x2100)
+PAYLOAD = bytes([
+        0x48, 0x52, 0x52, 0x46, # Magic bytes (passing the first byte as company ID)
+        0x00, 0x00, 0x00, 0x00, 0x00, # Group ID
+        0x00, 0x00, # Unknown
+        0x00, # Sequence ID
+        0x00, # Power State
+        0x00, # Mode
+        0x00, 0x00, 0x00, 0x00, # Unknown
+        0x00, 0x00, # Brightness
+        0x00, 0x00, 0x00, 0x00, 0x00, # Unknown
+        0x00, # Mode (Copy))
+        0x01, # Effect Direction
+        ## The following can't currently fit in payload
+        # 0x00, # Effect Breathing Color
+        # 0x00, # Effect Fill Color
+        # 0x00, # Effect Color
+    ])
+
 # Simple Advertisement class - required by BlueZ D-Bus
 class Advertisement(dbus.service.Object):
-    def __init__(self, bus, path, ad_type, company_id, payload_data):
+    
+    def __init__(self, bus, path, ad_type, company_id=COMPANY_ID, payload_data=PAYLOAD):
         self.path = path
         self.bus = bus
         self.ad_type = ad_type
@@ -94,26 +114,16 @@ def main():
     # Step 4: Prepare the raw payload for legacy advertising
     print("\nPreparing legacy advertisement payload...")
     
-    company_id = dbus.UInt16(0x2100)
-    
-    payload = bytes([
-        0x48, 0x52, 0x52, 0x46,  # Magic bytes (passing the first byte as company ID)
-        0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00
-    ])
-    print(f"✓ Company ID: 0x{company_id:04x}")
-    print(f"✓ Payload ({len(payload)} bytes): {payload.hex()}")
+    print(f"✓ Company ID: 0x{COMPANY_ID:04x}")
+    print(f"✓ Payload ({len(PAYLOAD)} bytes): {PAYLOAD.hex()}")
     
     # Convert payload to D-Bus array format
-    payload_dbus = dbus.Array([dbus.Byte(b) for b in payload], signature='y')
+    payload_dbus = dbus.Array([dbus.Byte(b) for b in PAYLOAD], signature='y')
     
     # Step 5: Create legacy advertisement object
     advertisement_path = '/org/bluez/advertisement0'
     # Use 'peripheral' type for connectable legacy advertising (ADV_IND)
-    advertisement = Advertisement(bus, advertisement_path, 'peripheral', company_id, payload_dbus)
+    advertisement = Advertisement(bus, advertisement_path, 'peripheral', COMPANY_ID, payload_dbus)
     
     # Step 6: Get advertising manager interface
     ad_manager = dbus.Interface(
@@ -130,7 +140,6 @@ def main():
         nonlocal registration_complete
         registration_complete = True
         print('✓ Advertisement registered successfully')
-        print('\n--- Broadcasting BLE Legacy Advertisement ---')
         print('Press Ctrl+C to stop...\n')
     
     def on_register_error(error):
