@@ -18,9 +18,9 @@ DBUS_PROP_IFACE = 'org.freedesktop.DBus.Properties'
 LE_ADVERTISEMENT_IFACE = 'org.bluez.LEAdvertisement1'
 
 COMPANY_ID = dbus.UInt16(0x2100)
+MAGIC_BYTES = bytes([0x48, 0x52, 0x52, 0x46]) # "HRRF" - first byte is company ID, next 3 are magic bytes
 PAYLOAD = bytes([
-        0x48, 0x52, 0x52, 0x46, # Magic bytes (passing the first byte as company ID)
-        0x00, 0x00, 0x00, 0x00, 0x00, # Group ID
+        0xd2, 0x98, 0x5f, 0x25, 0xeb, 0xb2, # Group ID
         0x00, 0x00, # Unknown
         0x00, # Sequence ID
         0x00, # Power State
@@ -29,8 +29,8 @@ PAYLOAD = bytes([
         0x00, 0x00, # Brightness
         0x00, 0x00, 0x00, 0x00, 0x00, # Unknown
         0x00, # Mode (Copy))
-        0x01, # Effect Direction
         ## The following can't currently fit in payload
+        # 0x00, # Effect Direction
         # 0x00, # Effect Breathing Color
         # 0x00, # Effect Fill Color
         # 0x00, # Effect Color
@@ -39,7 +39,7 @@ PAYLOAD = bytes([
 # Simple Advertisement class - required by BlueZ D-Bus
 class Advertisement(dbus.service.Object):
     
-    def __init__(self, bus, path, ad_type, company_id=COMPANY_ID, payload_data=PAYLOAD):
+    def __init__(self, bus, path, ad_type, company_id, payload_data):
         self.path = path
         self.bus = bus
         self.ad_type = ad_type
@@ -118,7 +118,7 @@ def main():
     print(f"✓ Payload ({len(PAYLOAD)} bytes): {PAYLOAD.hex()}")
     
     # Convert payload to D-Bus array format
-    payload_dbus = dbus.Array([dbus.Byte(b) for b in PAYLOAD], signature='y')
+    payload_dbus = dbus.Array([dbus.Byte(b) for b in (MAGIC_BYTES + PAYLOAD)], signature='y')
     
     # Step 5: Create legacy advertisement object
     advertisement_path = '/org/bluez/advertisement0'
