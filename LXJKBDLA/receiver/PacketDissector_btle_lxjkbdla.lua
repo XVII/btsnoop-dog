@@ -124,7 +124,10 @@ fields.payload_index = ProtoField.bytes(proto.name .. ".payload_index", "   Byte
 fields.expected_length = ProtoField.string(proto.name .. ".expected_length", "Expected Length", base.NONE)
 
 
--- Function to check if bytes match magic number
+-- Fixed offset where magic number should appear
+local MAGIC_OFFSET = 0x20  -- 32 decimal
+
+-- Function to check if bytes match magic number at fixed offset
 local function check_magic_number(buffer, offset)
     if buffer:len() < offset + MAGIC_LENGTH then
         return false
@@ -139,46 +142,34 @@ local function check_magic_number(buffer, offset)
     return true
 end
 
--- Function to find magic number offset in buffer
-local function find_magic_offset(buffer)
-    for offset = 0, buffer:len() - MAGIC_LENGTH do
-        if check_magic_number(buffer, offset) then
-            return offset
-        end
-    end
-    return nil
-end
-
 -- Dissector function
 function proto.dissector(buffer, pinfo, tree)
-    -- Check if buffer has sufficient length for magic number
-    if buffer:len() < MAGIC_LENGTH then
+    -- Check if buffer has sufficient length for magic number at fixed offset
+    if buffer:len() < MAGIC_OFFSET + MAGIC_LENGTH then
         return 0
     end
 
-    -- Check for magic number in advertisement data
-    local magic_offset = find_magic_offset(buffer)
-
-    if not magic_offset then
+    -- Check for magic number at fixed offset 0x20
+    if not check_magic_number(buffer, MAGIC_OFFSET) then
         return 0
     end
 
     -- Set protocol in column
-    pinfo.cols.protocol = "BLE Lexon x Jeff Koons Balloon Dog Lamp Protocol (Offset: " .. magic_offset .. ")"
+    pinfo.cols.protocol = "BLE Lexon x Jeff Koons Balloon Dog Lamp Protocol"
 
     -- Create main subtree
     local subtree = tree:add(proto, buffer(), "Lexon x Jeff Koons Balloon Dog Lamp Data")
 
     -- Parse all fields using unified definitions
     for _, def in ipairs(FIELD_DEFS) do
-        local abs_offset = magic_offset + def.offset
+        local abs_offset = MAGIC_OFFSET + def.offset
         if buffer:len() >= abs_offset + def.length then
             subtree:add(def.field, buffer(abs_offset, def.length))
         end
     end
 
     -- Payload bytes post-magic (everything after magic number for debugging)
-    local payload_bytes_abs = magic_offset + MAGIC_LENGTH
+    local payload_bytes_abs = MAGIC_OFFSET + MAGIC_LENGTH
     if buffer:len() > payload_bytes_abs then
         local payload_bytes = buffer(payload_bytes_abs, buffer:len() - payload_bytes_abs - BTLE_CRC_LENGTH)
         subtree:add(fields.payload_bytes, payload_bytes)
@@ -197,7 +188,7 @@ function proto.dissector(buffer, pinfo, tree)
     end
 
     -- Check for unexpected data length (excluding BTLE CRC)
-    local payload_length = buffer:len() - magic_offset - MAGIC_LENGTH - BTLE_CRC_LENGTH
+    local payload_length = buffer:len() - MAGIC_OFFSET - MAGIC_LENGTH - BTLE_CRC_LENGTH
     if payload_length > EXPECTED_LENGTH then
         subtree:add(fields.expected_length,
             "Longer: Payload length (" ..
