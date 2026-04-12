@@ -1,6 +1,6 @@
 # btsnoop-dog
 
-Looking to reverse engineer the Bluetooth LE control protocol for the LX/JK Balloon Dog Lamp.
+Looking to reverse engineer the Bluetooth LE control protocol for the Lexon x Jeff Koons Balloon Dog.
 
 - [Lamp LXJKBDLA](LXJKBDLA/)
 
