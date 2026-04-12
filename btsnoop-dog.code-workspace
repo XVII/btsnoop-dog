@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "LXJKBDLA"
+		},
+		{
+			"path": "LXJKBDSA"
+		}
+	],
+	"extensions": {
+		"recommendations": [
+			"curtismechling.wireshark-lua-toolkit"
+		]
+	},
+	"settings": {
+		"wiresharkLua.autoRunReplOnActivate": true,
+		"wiresharkLua.tsharkPath": "C:\\Program Files\\Wireshark\\tshark.exe",
+	}
+}
