@@ -170,7 +170,7 @@ function proto.dissector(buffer, pinfo, tree)
 
     -- Payload bytes post-magic (everything after magic number for debugging)
     local payload_bytes_abs = MAGIC_OFFSET + MAGIC_LENGTH
-    if buffer:len() > payload_bytes_abs then
+    if buffer:len() > payload_bytes_abs + BTLE_CRC_LENGTH then
         local payload_bytes = buffer(payload_bytes_abs, buffer:len() - payload_bytes_abs - BTLE_CRC_LENGTH)
         subtree:add(fields.payload_bytes, payload_bytes)
 
